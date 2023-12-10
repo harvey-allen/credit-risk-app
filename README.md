@@ -39,8 +39,8 @@ Before you begin, ensure you have met the following requirements:
 
    ```bash
    git clone https://github.com/harvey-allen/credit-risk-model.git
-   cd credit-scoring-app
-
+   cd credit-risk-model
+   
 2. Install project dependencies:
    ```bash
    pip install -r requirements.txt
