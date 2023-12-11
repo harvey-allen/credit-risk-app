@@ -72,11 +72,6 @@ Before you begin, ensure you have met the following requirements:
 
 For detailed API documentation, refer to the API documentation (link here).
 
-## Customization
-
-- Implement your custom credit scoring model.
-- Modify the model fields and validation in `serializers.py` for specific requirements.
-
 ## Contributing
 
 Contributions are welcome!
