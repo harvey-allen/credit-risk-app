@@ -38,8 +38,8 @@ Before you begin, ensure you have met the following requirements:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/harvey-allen/credit-risk-model.git
-   cd credit-risk-model
+   git clone https://github.com/harvey-allen/credit-risk-api.git
+   cd credit-risk-api
    
 2. Install project dependencies:
    ```bash
