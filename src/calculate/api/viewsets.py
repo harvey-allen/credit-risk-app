@@ -35,9 +35,9 @@ class CreditParametersViewSet(viewsets.ModelViewSet):
         model = pickle.load(open(filename, "rb"))
         data = serializer.validated_data
         credit_prediction = model.predict(data)
+        self.log.info(
+            f"{data[id]} has a predicted credit score of {credit_prediction}."
+        )
         with transaction.atomic():
-            self.log.info(
-                f"{data[id]} has a predicted credit score of {credit_prediction}."
-            )
             data["credit_score"] = credit_prediction
             serializer.save()
