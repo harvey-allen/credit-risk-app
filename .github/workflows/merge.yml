@@ -55,10 +55,7 @@ jobs:
         run: docker compose up -d db
         
       - name: Wait for database
-        run: |
-          echo "Waiting for database to be ready..."
-          docker compose exec db pg_isready -U postgres -t 30 || sleep 10
-          docker compose exec db pg_isready -U postgres -t 30
+        run: sleep 15
         
       - name: Run tests
         run: docker compose run --rm tests
