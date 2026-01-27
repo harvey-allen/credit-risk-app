@@ -21,6 +21,9 @@ COPY requirements.txt ./
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install linting tools
+RUN pip install --no-cache-dir ruff
+
 RUN mkdir -p /app/logs
 
 # Copy source

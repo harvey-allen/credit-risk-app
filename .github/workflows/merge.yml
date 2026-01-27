@@ -5,24 +5,41 @@ on:
       - master
 jobs:
   linting:
-    runs-on: Large-Runner
-    env:
-      COMPOSE_FILE: docker/docker-compose.local.yml
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/docker
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
+      
       - name: Build lint image
         run: docker-compose build lint
+        
       - name: Run Linting
-        run: docker-compose run lint
+        run: docker-compose run --rm lint
+        
   testing:
-    runs-on: Large-Runner
-    env:
-      COMPOSE_FILE: docker/docker-compose.local.yml
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/docker
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
-      - name: Build test image
-        run: docker-compose build tests
+        
+      - name: Build test images
+        run: docker-compose build tests db
+        
+      - name: Start database
+        run: docker-compose up -d db
+        
+      - name: Wait for database
+        run: sleep 5
+        
       - name: Run tests
-        run: docker-compose run tests
+        run: docker-compose run --rm tests
+        
+      - name: Stop services
+        if: always()
+        run: docker-compose down -v
