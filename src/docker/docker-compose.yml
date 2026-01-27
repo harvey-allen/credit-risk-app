@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   web:
     build:
@@ -26,6 +24,16 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  lint:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: bash scripts/lint.sh
+    volumes:
+      - ..:/app
+    environment:
+      - PYTHONUNBUFFERED=1
 
 volumes:
   postgres_data:

@@ -4,8 +4,6 @@ import os
 
 from django.db import transaction
 from rest_framework import viewsets
-from rest_framework.response import Response
-from rest_framework import status
 
 from calculate.api.serializers import CreditParametersSerializer
 from calculate.models import CreditParameters
@@ -34,7 +32,7 @@ class CreditParametersViewSet(viewsets.ModelViewSet):
     serializer_class = CreditParametersSerializer
 
     def list(self, request, *args, **kwargs):
-        logger.info(f"Fetching list of credit parameters")
+        logger.info("Fetching list of credit parameters")
         response = super().list(request, *args, **kwargs)
         logger.info(f"Retrieved {len(response.data)} credit parameter records")
         return response
