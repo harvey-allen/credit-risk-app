@@ -23,7 +23,8 @@ class PaymentBehaviour(models.TextChoices):
 
 class CreditParameters(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
     # Categorical Features
     month = models.CharField(max_length=10)
     occupation = models.CharField(max_length=100)
