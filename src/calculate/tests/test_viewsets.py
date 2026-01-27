@@ -14,6 +14,7 @@ class CreditParametersViewSetTest(TestCase):
         self.user = UserFactory()
 
         self.valid_data = {
+            "user": self.user.id,
             "name": "John Doe",
             "month": "January",
             "occupation": "Engineer",
@@ -62,6 +63,7 @@ class CreditParametersViewSetTest(TestCase):
     def test_update_credit_parameters(self):
         obj = CreditParametersFactory(credit_score="good")
         updated_data = self.valid_data.copy()
+        updated_data["user"] = obj.user.id
         updated_data["name"] = "Jane Doe"
 
         response = self.client.put(f"{self.base_url}{obj.id}/", updated_data, format="json")
