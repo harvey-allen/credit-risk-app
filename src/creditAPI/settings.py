@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'credit-database',
         'USER': 'credit',
         'PASSWORD': 'creditPassword123',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }

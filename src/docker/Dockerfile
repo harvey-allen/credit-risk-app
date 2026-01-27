@@ -1,16 +1,31 @@
-FROM python:3.8
+# src/docker/Dockerfile
+FROM python:3.11-slim
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
 
-WORKDIR /src
+# System dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY ../requirements.txt /src/
+# Upgrade pip
+RUN python -m pip install --upgrade pip
 
+# Copy requirements first (for caching)
+COPY requirements.txt ./
+
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/
+# Copy source
+COPY . .
 
+# Expose port
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "credit_score_project.wsgi:application"]
+# Default command
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
