@@ -66,7 +66,7 @@ class CreditParameters(models.Model):
     def save(self, *args, **kwargs):
         is_new = self._state.adding
         if is_new:
-            logger.info(f"Creating new credit parameter record")
+            logger.info("Creating new credit parameter record")
         else:
             logger.info(f"Updating credit parameter record {self.id}")
         

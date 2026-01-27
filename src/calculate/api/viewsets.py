@@ -160,7 +160,7 @@ class CreditParametersViewSet(viewsets.ModelViewSet):
                 try:
                     serializer.save(user=user_obj)
                     logger.info(f"Successfully saved credit parameters for user {user_id}")
-                except IntegrityError as e:
+                except IntegrityError:
                     logger.error(f"Integrity error: User {user_id} already has credit parameters")
                     raise ValidationError({
                         "user": f"Credit parameters already exist for user with email '{user_email}'."
