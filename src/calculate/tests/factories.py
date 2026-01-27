@@ -21,14 +21,12 @@ class CreditParametersFactory(DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     name = "John Doe"
-    month = "January"
     occupation = "Engineer"
     delay_from_due_date = "0"
     credit_mix = "Standard"
     payment_of_minimum_amount = "Yes"
     payment_behaviour = "LSSV"
     changed_credit_limit = "No"
-    credit_history_age = "5"
     age = 30
     annual_income = "50000.00"
     monthly_in_hand_salary = "4000.00"

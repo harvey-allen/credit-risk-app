@@ -3,25 +3,30 @@ import logging
 from rest_framework import serializers
 
 from calculate.models import CreditParameters
+from users.models import User
 
 logger = logging.getLogger("credit_serializers")
 
 
 class CreditParametersSerializer(serializers.ModelSerializer):
+    user = serializers.EmailField(write_only=True, required=False, allow_blank=True)
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    
     class Meta:
         model = CreditParameters
         fields = "__all__"
+        extra_kwargs = {
+            'credit_score': {'required': False}
+        }
 
     categorical_fields = [
         "name",
-        "month",
         "occupation",
         "delay_from_due_date",
         "credit_mix",
         "payment_of_minimum_amount",
         "payment_behaviour",
         "changed_credit_limit",
-        "credit_history_age",
     ]
     numerical_fields = [
         "age",
@@ -60,6 +65,23 @@ class CreditParametersSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         logger.debug("Converting internal values for numerical fields")
+        
+        # Store user email for later processing in viewset
+        user_email = data.get('user')
+        if user_email:
+            # Check if user exists and set ID, otherwise remove from data
+            try:
+                user = User.objects.get(email=user_email)
+                logger.info(f"Found existing user with email {user_email}, ID: {user.id}")
+                # Remove the email field so it doesn't interfere with model validation
+                data = data.copy()
+                data.pop('user', None)
+            except User.DoesNotExist:
+                # Remove user field - will be handled by viewset
+                logger.info(f"User with email {user_email} does not exist - will be created")
+                data = data.copy()
+                data.pop('user', None)
+        
         for field in self.numerical_fields:
             if field in data:
                 try:
