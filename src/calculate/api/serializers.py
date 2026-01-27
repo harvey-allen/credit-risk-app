@@ -41,7 +41,7 @@ class CreditParametersSerializer(serializers.ModelSerializer):
     ]
 
     def validate(self, data):
-        logger.info(f"Validating credit parameters data")
+        logger.info("Validating credit parameters data")
         missing_categorical = [f for f in self.categorical_fields if f not in data]
         missing_numerical = [f for f in self.numerical_fields if f not in data]
         
@@ -59,7 +59,7 @@ class CreditParametersSerializer(serializers.ModelSerializer):
         return data
 
     def to_internal_value(self, data):
-        logger.debug(f"Converting internal values for numerical fields")
+        logger.debug("Converting internal values for numerical fields")
         for field in self.numerical_fields:
             if field in data:
                 try:
