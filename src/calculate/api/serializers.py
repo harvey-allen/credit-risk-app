@@ -10,13 +10,10 @@ class CreditParametersSerializer(serializers.ModelSerializer):
         model = CreditParameters
         fields = "__all__"
 
-    log = logging.getLogger("credit_parameters")
-
     categorical_fields = [
         "name",
         "month",
         "occupation",
-        "type_of_loans",
         "delay_from_due_date",
         "credit_mix",
         "payment_of_minimum_amount",
@@ -32,8 +29,8 @@ class CreditParametersSerializer(serializers.ModelSerializer):
         "number_of_credit_cards",
         "interest_rate",
         "number_of_loans",
-        "number_of_delayed_payments",
-        "number_of_credit_inquiries",
+        "number_of_delayed_payment",
+        "num_credit_inquiries",
         "outstanding_debt",
         "credit_utilization_ratio",
         "total_emi_per_month",
@@ -44,22 +41,20 @@ class CreditParametersSerializer(serializers.ModelSerializer):
     def validate(self, data):
         for field in self.categorical_fields:
             if field not in data:
-                self.log.error(f"categorical {field} is missing.")
                 raise serializers.ValidationError(f"categorical {field} is required.")
         for field in self.numerical_fields:
             if field not in data:
-                self.log.error(f"numerical {field} is missing.")
                 raise serializers.ValidationError(f"numerical {field} is required.")
         return data
 
-    def clean(self):
-        cleaned_data = super().clean()
-
+    def to_internal_value(self, data):
         for field in self.numerical_fields:
-            if field in cleaned_data:
-                cleaned_data[field] = round(cleaned_data[field], 2)
-                self.log.info(
-                    f"numerical {field} has been rounded to 2 decimal places."
-                )
+            if field in data:
+                try:
+                    data[field] = round(float(data[field]), 2)
+                except (ValueError, TypeError):
+                    raise serializers.ValidationError(
+                        {field: "Must be a number."}
+                    )
+        return super().to_internal_value(data)
 
-        return cleaned_data
