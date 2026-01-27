@@ -1,9 +1,12 @@
 import uuid
+import logging
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from users.models import User
+
+logger = logging.getLogger("credit_models")
 
 
 class CreditStatus(models.TextChoices):
@@ -63,7 +66,21 @@ class CreditParameters(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        super(CreditParameters, self).save(*args, **kwargs)
+        is_new = self._state.adding
+        if is_new:
+            logger.info(f"Creating new credit parameter record for user: {self.user}")
+        else:
+            logger.info(f"Updating credit parameter record {self.id}")
+        
+        try:
+            super(CreditParameters, self).save(*args, **kwargs)
+            if is_new:
+                logger.info(f"Successfully created credit parameter {self.id}")
+            else:
+                logger.info(f"Successfully updated credit parameter {self.id}")
+        except Exception as e:
+            logger.error(f"Failed to save credit parameter: {str(e)}", exc_info=True)
+            raise
 
 
 class CreditLoans(models.Model):
