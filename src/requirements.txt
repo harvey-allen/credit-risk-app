@@ -4,3 +4,5 @@ djangorestframework
 drf-spectacular
 django-safedelete
 factory_boy
+scikit-learn
+pandas

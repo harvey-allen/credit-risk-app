@@ -29,7 +29,6 @@ class CreditParameters(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     # Categorical Features
-    month = models.CharField(max_length=10)
     occupation = models.CharField(max_length=100)
     delay_from_due_date = models.CharField(max_length=10)
     credit_mix = models.CharField(max_length=100)
@@ -40,7 +39,6 @@ class CreditParameters(models.Model):
         verbose_name="payment behaviour",
     )
     changed_credit_limit = models.CharField(max_length=10)
-    credit_history_age = models.CharField(max_length=100)
     # Numerical Features
     age = models.IntegerField()
     annual_income = models.DecimalField(max_digits=10, decimal_places=2)
@@ -68,7 +66,7 @@ class CreditParameters(models.Model):
     def save(self, *args, **kwargs):
         is_new = self._state.adding
         if is_new:
-            logger.info(f"Creating new credit parameter record for user: {self.user}")
+            logger.info(f"Creating new credit parameter record")
         else:
             logger.info(f"Updating credit parameter record {self.id}")
         
