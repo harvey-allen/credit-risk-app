@@ -1,5 +1,6 @@
 services:
   web:
+    container_name: credit-risk-api
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -14,6 +15,7 @@ services:
       - db
 
   db:
+    container_name: credit-risk-db
     image: postgres:15
     restart: always
     environment:
@@ -26,6 +28,7 @@ services:
       - "5432:5432"
 
   lint:
+    container_name: credit-risk-lint
     build:
       context: ..
       dockerfile: docker/Dockerfile
