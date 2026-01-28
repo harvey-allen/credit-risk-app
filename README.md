@@ -2,7 +2,7 @@
 
 A full-stack web application for credit risk assessment and credit score prediction using machine learning. This application consists of a Django REST API backend and a React frontend, providing an intuitive interface for evaluating creditworthiness based on various financial parameters.
 
-## 🌟 Features
+## Features
 
 - **Credit Score Prediction**: Machine learning-based credit scoring using scikit-learn
 - **RESTful API**: Django REST Framework backend with comprehensive API endpoints
@@ -13,7 +13,7 @@ A full-stack web application for credit risk assessment and credit score predict
 - **Docker Support**: Containerized deployment with Docker Compose
 - **API Documentation**: Auto-generated API documentation with drf-spectacular
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
@@ -28,7 +28,7 @@ A full-stack web application for credit risk assessment and credit score predict
 - [Contributing](#contributing)
 - [License](#license)
 
-## 🏗️ Architecture
+## Architecture
 
 The application is structured as a monorepo containing:
 
@@ -51,7 +51,7 @@ The application is structured as a monorepo containing:
 - Axios (HTTP client)
 - React Scripts 5.0.1
 
-## 📦 Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
@@ -60,7 +60,7 @@ Before you begin, ensure you have the following installed:
 - PostgreSQL 12+ (or use Docker)
 - Docker and Docker Compose (optional, but recommended)
 
-## 🚀 Installation
+## Installation
 
 ### Using Docker (Recommended)
 
@@ -160,7 +160,7 @@ The API will be available at `http://localhost:8000`
 
 The frontend will be available at `http://localhost:3000`
 
-## 💡 Usage
+## Usage
 
 1. **Access the Application**: Open your browser and navigate to `http://localhost:3000`
 
@@ -248,7 +248,7 @@ curl -X POST http://localhost:8000/api/calculate/create/ \
   }'
 ```
 
-## 🔧 Development
+## Development
 
 ### Running Tests
 
@@ -280,7 +280,7 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-## 🔬 Research
+## Research
 
 The `/research` directory contains Jupyter notebooks used for:
 - Exploratory Data Analysis (EDA)
@@ -290,7 +290,7 @@ The `/research` directory contains Jupyter notebooks used for:
 
 The trained model (`credit_model.sav`) is located in the `src` directory and is used by the Django application for predictions.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -304,11 +304,11 @@ Contributions are welcome! Please follow these steps:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👤 Author
+## Author
 
 Harvey Allen
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Credit risk data and initial research conducted in January 2023
 - Built with Django REST Framework and React
