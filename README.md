@@ -177,7 +177,7 @@ The frontend will be available at `http://localhost:3000`
    - Standard Credit
    - Good Credit
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 credit-risk-app/
@@ -209,7 +209,7 @@ credit-risk-app/
 └── README.md                     # This file
 ```
 
-## 📚 API Documentation
+## API Documentation
 
 The API provides the following main endpoints:
 
@@ -300,7 +300,7 @@ Contributions are welcome! Please follow these steps:
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
