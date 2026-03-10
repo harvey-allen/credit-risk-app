@@ -107,3 +107,30 @@ __djdt_toolbar/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Terraform working directory
+.terraform/
+
+# Terraform state files (contain infrastructure data)
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+
+# Terraform variable files (often contain secrets)
+*.tfvars
+*.tfvars.json
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# Override files (used for local testing)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform lock file (optional – see note below)
+# .terraform.lock.hcl
