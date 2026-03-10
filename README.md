@@ -12,6 +12,7 @@ A full-stack web application for credit risk assessment and credit score predict
 - **PostgreSQL Database**: Production-ready database support
 - **Docker Support**: Containerized deployment with Docker Compose
 - **API Documentation**: Auto-generated API documentation with drf-spectacular
+- **Infrastructure as Code**: Terraform-managed AWS infrastructure (ECR + ECS Fargate)
 
 ## Table of Contents
 
@@ -23,6 +24,11 @@ A full-stack web application for credit risk assessment and credit score predict
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [API Documentation](#api-documentation)
+- [Infrastructure](#infrastructure)
+  - [Overview](#overview)
+  - [Resources](#resources)
+  - [LocalStack Development](#localstack-development)
+  - [Deploying to AWS](#deploying-to-aws)
 - [Development](#development)
 - [Research](#research)
 - [Contributing](#contributing)
@@ -50,6 +56,12 @@ The application is structured as a monorepo containing:
 - React 18.2.0
 - Axios (HTTP client)
 - React Scripts 5.0.1
+
+**Infrastructure (IaC):**
+- Terraform (AWS provider ~> 5.0)
+- Amazon ECR (container image registry)
+- Amazon ECS Fargate (serverless container runtime)
+- LocalStack (local AWS cloud emulation for development)
 
 ## Prerequisites
 
@@ -206,6 +218,12 @@ credit-risk-app/
 ├── research/                     # Research and analysis
 │   ├── credit_model.ipynb        # Model development notebook
 │   └── data/                     # Training data
+├── infratsructure/               # Terraform IaC configuration
+│   ├── provider.tf               # AWS provider & LocalStack config
+│   ├── ecr.tf                    # ECR repository definition
+│   ├── ecs.tf                    # ECS cluster & task definition
+│   ├── variables.tf              # Input variables
+│   └── outputs.tf                # Output values
 └── README.md                     # This file
 ```
 
@@ -246,6 +264,94 @@ curl -X POST http://localhost:8000/api/calculate/create/ \
     "monthly_balance": 2000.00,
     "payment_behaviour": "high_spend_medium_value_payments"
   }'
+```
+
+## Infrastructure
+
+### Overview
+
+The cloud infrastructure is defined as code using [Terraform](https://www.terraform.io/) and lives in the `infratsructure/` directory. It targets **AWS** and uses [LocalStack](https://www.localstack.cloud/) to emulate AWS services locally during development.
+
+| Component | AWS Service | Purpose |
+|-----------|-------------|-----------------------------|
+| Container registry | Amazon ECR | Stores the Docker image for the API |
+| Container runtime | Amazon ECS (Fargate) | Runs the API container serverlessly |
+
+### Resources
+
+**ECR Repository** (`ecr.tf`)
+- Repository name: `credit-risk-api`
+- Image scanning on push is disabled (enable for production)
+
+**ECS Cluster & Task Definition** (`ecs.tf`)
+- Cluster name: `credit-risk-cluster`
+- Launch type: `FARGATE` (serverless, no EC2 instances to manage)
+- Network mode: `awsvpc`
+- CPU: `256` units · Memory: `512` MB
+- Container port: `8000` (Django API)
+
+**Outputs** (`outputs.tf`)
+- `ecr_repo` – ECR repository URL (use as the image URI when pushing)
+- `ecs_cluster` – ECS cluster name
+
+**Input Variables** (`variables.tf`)
+
+| Variable | Default | Description |
+|---|---|---|
+| `aws_access_key` | `test` | AWS access key (override in CI/CD) |
+| `aws_secret_key` | `test` | AWS secret key (override in CI/CD) |
+| `aws_region` | `eu-west-2` | Target AWS region |
+| `localstack_endpoint` | `http://localhost:4566` | LocalStack endpoint for local dev |
+
+### LocalStack Development
+
+[LocalStack](https://www.localstack.cloud/) lets you provision and test the AWS resources on your local machine without incurring cloud costs.
+
+1. Install and start LocalStack:
+   ```bash
+   pip install localstack
+   localstack start
+   ```
+
+2. Initialise Terraform with the default (LocalStack) configuration:
+   ```bash
+   cd infratsructure
+   terraform init
+   terraform plan
+   terraform apply
+   ```
+
+   The default variable values point to `http://localhost:4566`, so no extra flags are needed for local development.
+
+3. Confirm the resources were created:
+   ```bash
+   terraform output
+   ```
+
+### Deploying to AWS
+
+Override the LocalStack defaults with real AWS credentials when targeting a live environment:
+
+```bash
+cd infratsructure
+terraform apply \
+  -var="aws_access_key=<YOUR_ACCESS_KEY>" \
+  -var="aws_secret_key=<YOUR_SECRET_KEY>" \
+  -var="aws_region=eu-west-2"
+```
+
+> **Security tip:** Never commit real credentials to source control. Use environment variables (`TF_VAR_aws_access_key`, `TF_VAR_aws_secret_key`) or an AWS credentials file instead.
+
+After applying, push the Docker image to the ECR repository:
+```bash
+# Authenticate Docker with ECR
+aws ecr get-login-password --region eu-west-2 | \
+  docker login --username AWS --password-stdin $(terraform output -raw ecr_repo)
+
+# Build and push
+docker build -t credit-risk-api ./src
+docker tag credit-risk-api:latest $(terraform output -raw ecr_repo):latest
+docker push $(terraform output -raw ecr_repo):latest
 ```
 
 ## Development
