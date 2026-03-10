@@ -9,9 +9,9 @@ terraform {
 
 provider "aws" {
 
-  access_key = "test"
-  secret_key = "test"
-  region     = "eu-west-2"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+  region     = var.aws_region
 
   s3_use_path_style           = true
   skip_credentials_validation = true
@@ -19,8 +19,8 @@ provider "aws" {
   skip_requesting_account_id  = true
 
   endpoints {
-    ecs = "http://localhost:4566"
-    ecr = "http://localhost:4566"
-    iam = "http://localhost:4566"
+    ecs = var.localstack_endpoint
+    ecr = var.localstack_endpoint
+    iam = var.localstack_endpoint
   }
 }
