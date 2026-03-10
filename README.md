@@ -70,7 +70,7 @@ Before you begin, ensure you have the following installed:
    cd credit-risk-app
    ```
 
-2. Create a `.env` file in the `src/docker` directory:
+2. Create a `.env` file in the `src/` directory:
    ```bash
    cd src
    cp .env.example .env  # If example exists, or create manually

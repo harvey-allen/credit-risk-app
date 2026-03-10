@@ -38,5 +38,28 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
 
+  unit-test:
+    container_name: credit-risk-test
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: bash scripts/test.sh
+    volumes:
+      - ..:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  localstack:
+    container_name: aws-localstack
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=ecr,ecs,iam
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
 volumes:
   postgres_data:
