@@ -1,33 +1,33 @@
 resource "aws_ecs_cluster" "credit_risk_cluster" {
-  name = "credit-risk-cluster"
+  name = var.cluster_name
 }
 
 resource "aws_ecs_task_definition" "api_task" {
 
-  family                   = "credit-risk-api"
+  family                   = var.task_family
   requires_compatibilities = ["FARGATE"]
 
-  cpu    = "256"
-  memory = "512"
+  cpu    = var.container_cpu
+  memory = var.container_memory
 
   network_mode = "awsvpc"
 
   container_definitions = jsonencode([
     {
-      name  = "credit-risk-api"
-      image = "credit-risk-api:latest"
+      name  = var.container_name
+      image = var.container_image
 
       portMappings = [
         {
-          containerPort = 8000
-          hostPort      = 8000
+          containerPort = var.container_port
+          hostPort      = var.container_port
         }
       ]
 
       environment = [
         {
           name  = "ENV"
-          value = "local"
+          value = var.environment
         }
       ]
     }
