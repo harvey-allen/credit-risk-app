@@ -26,7 +26,9 @@ A full-stack web application for credit risk assessment and credit score predict
 - [API Documentation](#api-documentation)
 - [Infrastructure](#infrastructure)
   - [Overview](#overview)
-  - [Resources](#resources)
+   - [Atmos Layout](#atmos-layout)
+   - [Resources](#resources)
+   - [Atmos Workflow](#atmos-workflow)
   - [LocalStack Development](#localstack-development)
   - [Deploying to AWS](#deploying-to-aws)
 - [Development](#development)
@@ -218,12 +220,11 @@ credit-risk-app/
 ├── research/                     # Research and analysis
 │   ├── credit_model.ipynb        # Model development notebook
 │   └── data/                     # Training data
-├── infratsructure/               # Terraform IaC configuration
-│   ├── provider.tf               # AWS provider & LocalStack config
-│   ├── ecr.tf                    # ECR repository definition
-│   ├── ecs.tf                    # ECS cluster & task definition
-│   ├── variables.tf              # Input variables
-│   └── outputs.tf                # Output values
+├── infrastructure/               # Atmos + Terraform IaC configuration
+│   ├── atmos.yaml                # Atmos root config
+│   ├── components/terraform/     # Terraform components
+│   │   └── credit-risk-service/  # ECR + ECS service component
+│   └── stacks/                   # Stack manifests (env + region)
 └── README.md                     # This file
 ```
 
@@ -270,7 +271,23 @@ curl -X POST http://localhost:8000/api/calculate/create/ \
 
 ### Overview
 
-The cloud infrastructure is defined as code using [Terraform](https://www.terraform.io/) and lives in the `infratsructure/` directory. It targets **AWS** and uses [LocalStack](https://www.localstack.cloud/) to emulate AWS services locally during development.
+The cloud infrastructure is defined as code using [Terraform](https://www.terraform.io/) and orchestrated with [Atmos](https://atmos.tools/). It lives in the `infrastructure/` directory and targets **AWS**. [LocalStack](https://www.localstack.cloud/) is used to emulate AWS services locally during development.
+
+### Atmos Layout
+
+- Atmos config: `infrastructure/atmos.yaml`
+- Terraform component: `infrastructure/components/terraform/credit-risk-service/`
+- Stack manifests:
+   - `infrastructure/stacks/orgs/environment/development/eu-west-2.yaml`
+   - `infrastructure/stacks/orgs/environment/development/us-east-1.yaml`
+   - `infrastructure/stacks/orgs/environment/production/eu-west-2.yaml`
+   - `infrastructure/stacks/orgs/environment/production/us-east-1.yaml`
+
+Resolved Atmos stack names are:
+- `orgs-environment-dev-eu-west-2`
+- `orgs-environment-dev-us-east-1`
+- `orgs-environment-prod-eu-west-2`
+- `orgs-environment-prod-us-east-1`
 
 | Component | AWS Service | Purpose |
 |-----------|-------------|-----------------------------|
@@ -279,29 +296,44 @@ The cloud infrastructure is defined as code using [Terraform](https://www.terraf
 
 ### Resources
 
-**ECR Repository** (`ecr.tf`)
+**ECR Repository** (`components/terraform/credit-risk-service/ecr.tf`)
 - Repository name: `credit-risk-api`
 - Image scanning on push is disabled (enable for production)
 
-**ECS Cluster & Task Definition** (`ecs.tf`)
-- Cluster name: `credit-risk-cluster`
+**ECS Cluster & Task Definition** (`components/terraform/credit-risk-service/ecs.tf`)
+- Cluster name is stack-driven (`cluster_name` variable)
 - Launch type: `FARGATE` (serverless, no EC2 instances to manage)
 - Network mode: `awsvpc`
 - CPU: `256` units · Memory: `512` MB
 - Container port: `8000` (Django API)
 
-**Outputs** (`outputs.tf`)
+**Outputs** (`components/terraform/credit-risk-service/outputs.tf`)
 - `ecr_repo` – ECR repository URL (use as the image URI when pushing)
 - `ecs_cluster` – ECS cluster name
 
-**Input Variables** (`variables.tf`)
+### Atmos Workflow
+
+From the `infrastructure/` directory:
+
+```bash
+atmos list stacks
+atmos list components -s orgs-environment-dev-eu-west-2
+atmos terraform validate credit-risk-service -s orgs/environment/development/eu-west-2
+atmos terraform plan credit-risk-service -s orgs/environment/development/eu-west-2
+atmos terraform apply credit-risk-service -s orgs/environment/development/eu-west-2
+```
+
+**Input Variables** (`components/terraform/credit-risk-service/variables.tf`)
 
 | Variable | Default | Description |
 |---|---|---|
-| `aws_access_key` | `test` | AWS access key (override in CI/CD) |
-| `aws_secret_key` | `test` | AWS secret key (override in CI/CD) |
-| `aws_region` | `eu-west-2` | Target AWS region |
+| `aws_access_key` | n/a | AWS access key (provided via stack vars or env) |
+| `aws_secret_key` | n/a | AWS secret key (provided via stack vars or env) |
+| `aws_region` | n/a | Target AWS region (set per stack) |
 | `localstack_endpoint` | `http://localhost:4566` | LocalStack endpoint for local dev |
+| `use_localstack` | `true` | Enables LocalStack provider endpoints and skip checks |
+
+For detailed infrastructure-only guidance, see `infrastructure/README.md`.
 
 ### LocalStack Development
 
@@ -313,19 +345,17 @@ The cloud infrastructure is defined as code using [Terraform](https://www.terraf
    localstack start
    ```
 
-2. Initialise Terraform with the default (LocalStack) configuration:
+2. Initialise and validate with Atmos:
    ```bash
-   cd infratsructure
-   terraform init
-   terraform plan
-   terraform apply
+   cd infrastructure
+   atmos terraform validate credit-risk-service -s orgs/environment/development/eu-west-2
+   atmos terraform plan credit-risk-service -s orgs/environment/development/eu-west-2
+   atmos terraform apply credit-risk-service -s orgs/environment/development/eu-west-2
    ```
-
-   The default variable values point to `http://localhost:4566`, so no extra flags are needed for local development.
 
 3. Confirm the resources were created:
    ```bash
-   terraform output
+   atmos terraform output credit-risk-service -s orgs/environment/development/eu-west-2
    ```
 
 ### Deploying to AWS
@@ -333,25 +363,30 @@ The cloud infrastructure is defined as code using [Terraform](https://www.terraf
 Override the LocalStack defaults with real AWS credentials when targeting a live environment:
 
 ```bash
-cd infratsructure
-terraform apply \
-  -var="aws_access_key=<YOUR_ACCESS_KEY>" \
-  -var="aws_secret_key=<YOUR_SECRET_KEY>" \
-  -var="aws_region=eu-west-2"
+cd infrastructure
+atmos terraform apply credit-risk-service -s orgs/environment/production/eu-west-2 \
+   -- \
+   -var="aws_access_key=<YOUR_ACCESS_KEY>" \
+   -var="aws_secret_key=<YOUR_SECRET_KEY>" \
+   -var="aws_region=eu-west-2" \
+   -var="use_localstack=false"
 ```
 
 > **Security tip:** Never commit real credentials to source control. Use environment variables (`TF_VAR_aws_access_key`, `TF_VAR_aws_secret_key`) or an AWS credentials file instead.
 
 After applying, push the Docker image to the ECR repository:
 ```bash
+# Get the ECR URL from Atmos output and copy the `ecr_repo` value
+atmos terraform output credit-risk-service -s orgs/environment/production/eu-west-2
+
 # Authenticate Docker with ECR
 aws ecr get-login-password --region eu-west-2 | \
-  docker login --username AWS --password-stdin $(terraform output -raw ecr_repo)
+   docker login --username AWS --password-stdin <ECR_REPOSITORY_URL>
 
 # Build and push
 docker build -t credit-risk-api ./src
-docker tag credit-risk-api:latest $(terraform output -raw ecr_repo):latest
-docker push $(terraform output -raw ecr_repo):latest
+docker tag credit-risk-api:latest <ECR_REPOSITORY_URL>:latest
+docker push <ECR_REPOSITORY_URL>:latest
 ```
 
 ## Development
